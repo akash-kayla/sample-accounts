@@ -199,3 +199,148 @@ input[type="number"] {
 .recharts-rectangle {
   transition: opacity 0.15s;
 }
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-6px);
+  }
+  40%,
+  80% {
+    transform: translateX(6px);
+  }
+}
+.animate-shake {
+  animation: shake 0.4s ease-in-out;
+}
+
+/* ---------------- Easter egg 🌷 (/for-you) ---------------- */
+
+.love-page {
+  background:
+    radial-gradient(circle at 15% 10%, #ffe4ec 0, transparent 45%),
+    radial-gradient(circle at 85% 90%, #ffc9d9 0, transparent 50%),
+    linear-gradient(180deg, #fff1f5 0%, #ffd9e4 100%);
+  transition: background 0.6s;
+}
+.love-page.is-sad {
+  background:
+    radial-gradient(circle at 50% 30%, #eef2f7 0, transparent 55%),
+    linear-gradient(180deg, #f1f3f8 0%, #dfe3ec 100%);
+}
+.love-page,
+.love-page * {
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Ctext x='16' y='26' font-size='26' text-anchor='middle'%3E%F0%9F%8C%B7%3C/text%3E%3C/svg%3E")
+      16 6,
+    pointer !important;
+}
+
+.love-drop {
+  position: absolute;
+  top: 0;
+  line-height: 1;
+  user-select: none;
+  will-change: transform;
+  animation: love-fall linear infinite both;
+}
+@keyframes love-fall {
+  0% {
+    transform: translate3d(0, -15vh, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(calc(var(--drift) * -0.5), 50vh, 0) rotate(calc(var(--spin) * 0.5));
+  }
+  100% {
+    transform: translate3d(var(--drift), 115vh, 0) rotate(var(--spin));
+  }
+}
+
+.love-pop {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 20px;
+  line-height: 1;
+  animation: love-pop 0.9s ease-out forwards;
+}
+@keyframes love-pop {
+  from {
+    transform: translate(-50%, -50%) scale(0.4);
+    opacity: 1;
+  }
+  to {
+    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.1);
+    opacity: 0;
+  }
+}
+
+.love-in {
+  animation: love-in 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+@keyframes love-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.love-beat {
+  display: inline-block;
+  animation: love-beat 1.1s ease-in-out infinite;
+}
+@keyframes love-beat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  15% {
+    transform: scale(1.18);
+  }
+  30% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.12);
+  }
+}
+
+.love-wobble {
+  display: inline-block;
+  animation: love-wobble 2.4s ease-in-out infinite;
+}
+@keyframes love-wobble {
+  0%,
+  100% {
+    transform: rotate(-6deg) translateY(0);
+  }
+  50% {
+    transform: rotate(6deg) translateY(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .love-drop {
+    animation: none;
+    transform: translateY(var(--y));
+    opacity: 0.6;
+  }
+  .love-pop,
+  .love-beat,
+  .love-wobble,
+  .love-in,
+  .animate-shake {
+    animation: none;
+  }
+  .love-pop {
+    display: none;
+  }
+}

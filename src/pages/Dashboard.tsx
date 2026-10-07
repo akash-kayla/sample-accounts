@@ -17,6 +17,7 @@ import {
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CategoryDonut, DailyBars, IncomeExpenseBars, TrendLines } from '../components/charts';
+import { LoveEgg } from '../components/LoveEgg';
 import { TxnList } from '../components/TxnRow';
 import { Button, Card, CardHeader, cn, Input, Money, PageHeader, Segmented, StatCard } from '../components/ui';
 import { computeBalances } from '../lib/accounting';
@@ -118,7 +119,7 @@ export default function Dashboard() {
   if (!transactions.length && !data.invoices.length) {
     return (
       <div>
-        <PageHeader title={`${greet} 👋`} subtitle="Let’s set up your books. It takes less than a minute." />
+        <PageHeader title={`${greet} 👋`} subtitle="Let’s set up your books. It takes less than a minute." actions={<LoveEgg />} />
         <div className="grid gap-4 md:grid-cols-3">
           {[
             { to: '/add', icon: CirclePlus, title: 'Add your first entry', text: 'Record today’s expense or income — cash, UPI, card or bank.', primary: true },
@@ -149,11 +150,14 @@ export default function Dashboard() {
         title={`${greet} Sree 👋`}
         subtitle={fromISO(today).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
         actions={
-          <Link to="/add" className="hidden lg:block">
-            <Button variant="primary" icon={<CirclePlus className="size-4" />}>
-              Add entry
-            </Button>
-          </Link>
+          <>
+            <LoveEgg />
+            <Link to="/add" className="hidden lg:block">
+              <Button variant="primary" icon={<CirclePlus className="size-4" />}>
+                Add entry
+              </Button>
+            </Link>
+          </>
         }
       />
 

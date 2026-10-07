@@ -18,6 +18,7 @@ const Gst = lazy(() => import('./pages/Gst'));
 const Invoices = lazy(() => import('./pages/Invoices'));
 const InvoiceEditor = lazy(() => import('./pages/InvoiceEditor'));
 const Accounts = lazy(() => import('./pages/accounts/Accounts'));
+const ForYou = lazy(() => import('./pages/ForYou'));
 
 function Ready({ children }: { children: ReactNode }) {
   const { ready } = useData();
@@ -44,6 +45,7 @@ function Shell() {
                   <Route path="/invoices/new" element={<InvoiceEditor />} />
                   <Route path="/invoices/:id" element={<InvoiceEditor />} />
                   <Route path="/accounts/*" element={<Accounts />} />
+                  <Route path="/for-you" element={<ForYou />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </Ready>

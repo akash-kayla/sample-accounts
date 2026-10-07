@@ -76,7 +76,7 @@ npx firebase-tools login
 npx firebase-tools deploy --only hosting,database
 ```
 
-`firebase.json` already sets up the single-page-app rewrite. The same `dist/` folder also deploys to Netlify or Vercel (point every route to `index.html`).
+`firebase.json` already sets up the single-page-app rewrite. The same `dist/` folder also deploys to Netlify or Vercel (point every route to `index.html`). For Vercel, `vercel.json` already does this, so refreshing or opening a deep link like `/daily` works instead of a 404.
 
 ## Project layout
 

@@ -23,6 +23,7 @@ export function DatePicker({
   max,
   className,
   label = 'Date',
+  fromYear,
 }: {
   value: string;
   onChange: (iso: string) => void;
@@ -32,6 +33,8 @@ export function DatePicker({
   max?: string;
   className?: string;
   label?: string;
+  /** earliest year in the year dropdown (default: 10 years back) */
+  fromYear?: number;
 }) {
   const [open, setOpen] = useState(false);
   const [view, setView] = useState(() => startOfMonth(fromISO(value)));
@@ -122,12 +125,12 @@ export function DatePicker({
 
   const years = useMemo(() => {
     const now = new Date().getFullYear();
-    let from = Math.min(getYear(view), now - 10);
+    let from = Math.min(getYear(view), fromYear ?? now - 10);
     let to = Math.max(getYear(view), now + 1);
     if (min) from = Math.max(from, fromISO(min).getFullYear());
     if (max) to = Math.min(to, fromISO(max).getFullYear());
     return Array.from({ length: to - from + 1 }, (_, i) => from + i);
-  }, [view, min, max]);
+  }, [view, min, max, fromYear]);
 
   const moveFocus = (d: Date) => {
     const iso = toISO(d);
