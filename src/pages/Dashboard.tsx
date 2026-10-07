@@ -146,7 +146,7 @@ export default function Dashboard() {
   return (
     <div>
       <PageHeader
-        title={greet}
+        title={`${greet} Sree 👋`}
         subtitle={fromISO(today).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
         actions={
           <Link to="/add" className="hidden lg:block">
