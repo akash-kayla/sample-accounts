@@ -168,7 +168,14 @@ function LoveScene() {
               <span aria-hidden className="block font-serif text-6xl leading-none text-rose-300">
                 “
               </span>
-              <blockquote className="-mt-3 font-serif text-2xl italic leading-snug text-rose-950 text-balance sm:text-[32px]">{note}</blockquote>
+              <blockquote
+                className={cn(
+                  '-mt-3 font-serif italic leading-snug text-rose-950 text-balance',
+                  note.length > 120 ? 'text-xl sm:text-2xl' : 'text-2xl sm:text-[32px]',
+                )}
+              >
+                {note}
+              </blockquote>
               <figcaption className="mt-6 text-sm font-medium text-rose-700">— yours, always 💗</figcaption>
             </figure>
 

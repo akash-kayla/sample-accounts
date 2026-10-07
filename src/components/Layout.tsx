@@ -23,6 +23,7 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../store/auth';
 import { useData } from '../store/data';
 import { useTheme, type ThemeMode } from '../store/theme';
+import { BreakReminder } from './BreakReminder';
 import { cn, IconButton, Modal, Segmented } from './ui';
 
 export const NAV = [
@@ -263,6 +264,7 @@ export function Layout({ children }: { children: ReactNode }) {
       </main>
       <BottomNav onMore={() => setMore(true)} />
       <MoreSheet open={more} onClose={() => setMore(false)} />
+      <BreakReminder />
     </div>
   );
 }

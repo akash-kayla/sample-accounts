@@ -327,7 +327,92 @@ input[type="number"] {
   }
 }
 
+/* ---------------- Water break toast 💧 ---------------- */
+
+.water-wave {
+  animation: water-wave 2.4s linear infinite;
+}
+.water-wave-back {
+  animation: water-wave 3.4s linear infinite reverse;
+}
+@keyframes water-wave {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(32px);
+  }
+}
+.water-ice {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: water-ice 3s ease-in-out infinite;
+}
+@keyframes water-ice {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-14deg);
+  }
+  50% {
+    transform: translateY(2.5px) rotate(-4deg);
+  }
+}
+.water-bubble {
+  opacity: 0;
+  animation: water-bubble 2.1s ease-in infinite;
+}
+@keyframes water-bubble {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(-38px);
+    opacity: 0;
+  }
+}
+.water-bob {
+  transform-origin: 50% 100%;
+  animation: water-bob 2.6s ease-in-out infinite;
+}
+@keyframes water-bob {
+  0%,
+  100% {
+    transform: rotate(-5deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
+}
+.water-hop {
+  display: inline-block;
+  animation: water-hop 1.6s ease-in-out infinite;
+}
+@keyframes water-hop {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-6px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .water-wave,
+  .water-wave-back,
+  .water-ice,
+  .water-bob,
+  .water-hop {
+    animation: none;
+  }
+  .water-bubble {
+    display: none;
+  }
   .love-drop {
     animation: none;
     transform: translateY(var(--y));
