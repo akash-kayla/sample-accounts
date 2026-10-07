@@ -7,6 +7,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type ButtonHTMLAttributes,
@@ -584,11 +585,39 @@ export function Menu({
   align?: 'left' | 'right';
 }) {
   const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
   const ref = useRef<HTMLDivElement>(null);
+  const popRef = useRef<HTMLDivElement>(null);
+
+  // rendered in a portal so cards with overflow-hidden can't clip it; flips up near the bottom edge
+  useLayoutEffect(() => {
+    if (!open) return;
+    const place = () => {
+      const t = ref.current?.getBoundingClientRect();
+      const p = popRef.current;
+      if (!t || !p) return;
+      const w = p.offsetWidth;
+      const h = p.offsetHeight;
+      let top = t.bottom + 6;
+      if (top + h > window.innerHeight - 8 && t.top - 6 - h >= 8) top = t.top - 6 - h;
+      const left = Math.min(Math.max(8, align === 'right' ? t.right - w : t.left), window.innerWidth - w - 8);
+      setPos({ top, left: Math.max(8, left) });
+    };
+    place();
+    window.addEventListener('resize', place);
+    window.addEventListener('scroll', place, true);
+    return () => {
+      window.removeEventListener('resize', place);
+      window.removeEventListener('scroll', place, true);
+    };
+  }, [open, align]);
+
   useEffect(() => {
     if (!open) return;
     const fn = (e: MouseEvent | TouchEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      const n = e.target as Node;
+      if (ref.current?.contains(n) || popRef.current?.contains(n)) return;
+      setOpen(false);
     };
     const key = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
     document.addEventListener('mousedown', fn);
@@ -602,18 +631,25 @@ export function Menu({
   }, [open]);
   return (
     <div className="relative" ref={ref}>
-      {trigger({ onClick: () => setOpen((o) => !o), 'aria-expanded': open })}
-      {open && (
-        <div
-          role="menu"
-          className={cn(
-            'animate-fade absolute z-40 mt-1.5 min-w-[200px] overflow-hidden rounded-xl border border-line bg-surface p-1 shadow-xl',
-            align === 'right' ? 'right-0' : 'left-0',
-          )}
-        >
-          {children(() => setOpen(false))}
-        </div>
-      )}
+      {trigger({
+        onClick: () => {
+          if (!open) setPos(null);
+          setOpen((o) => !o);
+        },
+        'aria-expanded': open,
+      })}
+      {open &&
+        createPortal(
+          <div
+            ref={popRef}
+            role="menu"
+            style={pos ? { top: pos.top, left: pos.left } : { top: 0, left: 0, visibility: 'hidden' }}
+            className="animate-fade fixed z-[60] min-w-[200px] overflow-hidden rounded-xl border border-line bg-surface p-1 shadow-xl"
+          >
+            {children(() => setOpen(false))}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

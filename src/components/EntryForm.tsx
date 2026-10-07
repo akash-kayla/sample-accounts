@@ -1,14 +1,15 @@
-import { Banknote, Check, CreditCard, Landmark, Smartphone, X } from 'lucide-react';
+import { Banknote, Check, CreditCard, Landmark, Smartphone, Trash2, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { toast } from 'sonner';
 import { GROUPS } from '../lib/accounting';
 import { addDaysISO, todayISO } from '../lib/dates';
 import { COLOR_SLOTS, colorVar } from '../lib/defaults';
-import { currencySymbol, evalAmount, money, pct, round2 } from '../lib/format';
+import { currencySymbol, evalAmount, fmtDate, money, pct, round2 } from '../lib/format';
 import { calcGst, GSTIN_RE } from '../lib/gst';
 import type { EntryType, LedgerGroup, PaymentMode, Transaction } from '../lib/types';
 import { useData } from '../store/data';
-import { Button, Chip, cn, Field, Input, Segmented, Select, Switch, Textarea } from './ui';
+import { DatePicker } from './DatePicker';
+import { Button, Chip, cn, Field, Input, Segmented, Select, Switch, Textarea, useConfirm } from './ui';
 
 const MODES: { value: PaymentMode; label: string; icon: typeof Banknote }[] = [
   { value: 'cash', label: 'Cash', icon: Banknote },
@@ -57,14 +58,17 @@ export function EntryForm({
   autoFocus = true,
   defaultDate,
   inModal,
+  onDateChange,
 }: {
   initial?: Transaction;
   onDone?: (id: string, date: string) => void;
   autoFocus?: boolean;
   defaultDate?: string;
   inModal?: boolean;
+  onDateChange?: (date: string) => void;
 }) {
   const data = useData();
+  const confirm = useConfirm();
   const { categories, subcategories, storedLedgers, settings, currency, transactions } = data;
   const last = useMemo(readLast, []);
   const editing = !!initial;
@@ -73,7 +77,11 @@ export function EntryForm({
   const [amountText, setAmountText] = useState(
     initial ? String(initial.gstEnabled && !initial.gstInclusive ? initial.taxableAmount : initial.amount) : '',
   );
-  const [date, setDate] = useState(initial?.date ?? defaultDate ?? todayISO());
+  const [date, setDateState] = useState(initial?.date ?? defaultDate ?? todayISO());
+  const setDate = (d: string) => {
+    setDateState(d);
+    onDateChange?.(d);
+  };
   const [categoryId, setCategoryId] = useState(initial?.categoryId ?? '');
   const [subcategoryId, setSubcategoryId] = useState(initial?.subcategoryId ?? '');
   const [paymentMode, setPaymentMode] = useState<PaymentMode>(initial?.paymentMode ?? last.paymentMode ?? 'cash');
@@ -124,6 +132,8 @@ export function EntryForm({
   useEffect(() => {
     if (autoFocus) amountRef.current?.focus();
   }, [autoFocus]);
+
+  const entryDates = useMemo(() => new Set(transactions.map((t) => t.date)), [transactions]);
 
   const amount = evalAmount(amountText);
   const showCalc = amount !== null && /[+\-*/]/.test(amountText.replace(/^-/, ''));
@@ -232,6 +242,28 @@ export function EntryForm({
     else onDone?.(id, date);
   };
 
+  const removeEntry = async () => {
+    if (!initial) return;
+    const ok = await confirm({
+      title: 'Delete this entry?',
+      message: 'It will be removed from all reports and ledgers.',
+      confirmText: 'Delete',
+      danger: true,
+    });
+    if (!ok) return;
+    data.deleteTransaction(initial.id);
+    toast.success('Entry deleted', { action: { label: 'Undo', onClick: () => data.restoreTransaction(initial) } });
+    onDone?.(initial.id, initial.date);
+  };
+
+  const today = todayISO();
+  const dateHint =
+    date > today
+      ? 'Future date'
+      : date.slice(0, 7) !== today.slice(0, 7)
+        ? `Back-dated — goes into ${fmtDate(date, 'MMMM yyyy')}`
+        : undefined;
+
   const accent = type === 'expense' ? 'text-expense' : 'text-income';
   const sym = currencySymbol(currency);
   const homeState = settings.company.state || 'home state';
@@ -286,18 +318,15 @@ export function EntryForm({
       </div>
 
       {/* Date */}
-      <Field label="Date">
+      <Field label="Date" hint={dateHint}>
         <div className="flex flex-wrap items-center gap-2">
-          <Input
-            type="date"
-            value={date}
-            onChange={(e) => e.target.value && setDate(e.target.value)}
-            className="w-auto min-w-0 flex-1 sm:max-w-[200px]"
-          />
-          <Chip active={date === todayISO()} onClick={() => setDate(todayISO())}>
+          <div className="min-w-[200px] flex-1 sm:max-w-[260px]">
+            <DatePicker value={date} onChange={setDate} marked={entryDates} />
+          </div>
+          <Chip active={date === today} onClick={() => setDate(today)}>
             Today
           </Chip>
-          <Chip active={date === addDaysISO(todayISO(), -1)} onClick={() => setDate(addDaysISO(todayISO(), -1))}>
+          <Chip active={date === addDaysISO(today, -1)} onClick={() => setDate(addDaysISO(today, -1))}>
             Yesterday
           </Chip>
         </div>
@@ -538,7 +567,17 @@ export function EntryForm({
             : 'sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-10 -mx-2 rounded-2xl border border-line bg-surface/95 p-1.5 shadow-lg backdrop-blur lg:static lg:mx-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none',
         )}
       >
-        {!editing && (
+        {editing ? (
+          <Button
+            size="lg"
+            variant="ghost"
+            className="text-expense hover:bg-expense-soft hover:text-expense"
+            icon={<Trash2 className="size-5" />}
+            onClick={() => void removeEntry()}
+          >
+            Delete
+          </Button>
+        ) : (
           <Button size="lg" className="flex-1 whitespace-nowrap sm:flex-none" onClick={() => submit(true)()}>
             <span className="sm:hidden">Save & new</span>
             <span className="hidden sm:inline">Save & add another</span>

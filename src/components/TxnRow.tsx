@@ -36,7 +36,7 @@ export function TxnRow({
   return (
     <div
       className={cn(
-        'group flex items-center gap-3 border-b border-line px-4 last:border-b-0 sm:px-5',
+        '@container group flex items-center gap-3 border-b border-line px-4 last:border-b-0 sm:px-5',
         compact ? 'py-2.5' : 'py-3',
         clickable && 'cursor-pointer transition hover:bg-surface-2/60',
       )}
@@ -73,34 +73,55 @@ export function TxnRow({
       </div>
       <Money value={t.amount} type={t.type} signed className={cn('font-semibold', compact ? 'text-[13px]' : 'text-[15px]')} />
       {(onEdit || onDelete) && !compact && (
-        <div onClick={(e) => e.stopPropagation()}>
-          <Menu
-            trigger={(p) => (
-              <IconButton label="Entry actions" {...p} className="-mr-2 size-9">
-                <Ellipsis className="size-4" />
+        <div className="-mr-2 shrink-0" onClick={(e) => e.stopPropagation()}>
+          {/* wide rows: buttons always visible */}
+          <div className="hidden items-center @lg:flex">
+            {onEdit && (
+              <IconButton label="Edit entry" onClick={() => onEdit(t)} className="size-9">
+                <Pencil className="size-4" />
               </IconButton>
             )}
-          >
-            {(close) => (
-              <>
-                {onEdit && (
-                  <MenuItem icon={<Pencil />} onClick={() => (close(), onEdit(t))}>
-                    Edit
-                  </MenuItem>
-                )}
-                {onDuplicate && (
-                  <MenuItem icon={<Copy />} onClick={() => (close(), onDuplicate(t))}>
-                    Duplicate to today
-                  </MenuItem>
-                )}
-                {onDelete && (
-                  <MenuItem icon={<Trash2 />} danger onClick={() => (close(), onDelete(t))}>
-                    Delete
-                  </MenuItem>
-                )}
-              </>
+            {onDuplicate && (
+              <IconButton label="Duplicate to today" onClick={() => onDuplicate(t)} className="size-9">
+                <Copy className="size-4" />
+              </IconButton>
             )}
-          </Menu>
+            {onDelete && (
+              <IconButton label="Delete entry" onClick={() => onDelete(t)} className="size-9 hover:bg-expense-soft hover:text-expense">
+                <Trash2 className="size-4" />
+              </IconButton>
+            )}
+          </div>
+          {/* narrow rows (phones, side panels): menu */}
+          <div className="@lg:hidden">
+            <Menu
+              trigger={(p) => (
+                <IconButton label="Entry actions" {...p} className="size-9">
+                  <Ellipsis className="size-4" />
+                </IconButton>
+              )}
+            >
+              {(close) => (
+                <>
+                  {onEdit && (
+                    <MenuItem icon={<Pencil />} onClick={() => (close(), onEdit(t))}>
+                      Edit
+                    </MenuItem>
+                  )}
+                  {onDuplicate && (
+                    <MenuItem icon={<Copy />} onClick={() => (close(), onDuplicate(t))}>
+                      Duplicate to today
+                    </MenuItem>
+                  )}
+                  {onDelete && (
+                    <MenuItem icon={<Trash2 />} danger onClick={() => (close(), onDelete(t))}>
+                      Delete
+                    </MenuItem>
+                  )}
+                </>
+              )}
+            </Menu>
+          </div>
         </div>
       )}
     </div>
