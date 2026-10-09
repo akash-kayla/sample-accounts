@@ -1,8 +1,9 @@
 import { X } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent, type ReactNode } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '../components/ui';
 import { HER_NAME, noteOfTheDay, QUESTION } from '../lib/love';
+import { useLoveGif, type GifKind } from '../lib/love-gifs';
 
 const TULIPS = ['🌷'];
 const LOVE = ['🌷', '😘', '♥️', '💋'];
@@ -66,6 +67,38 @@ function Rain({ emojis, count, speed = 1, pour }: { emojis: string[]; count: num
           {d.e}
         </span>
       ))}
+    </div>
+  );
+}
+
+/** A GIF in a white sticker card; shows `fallback` while loading or when there's no GIF. */
+function LoveGif({ kind, className, fallback, children }: { kind: GifKind; className?: string; fallback: ReactNode; children?: ReactNode }) {
+  const gif = useLoveGif(kind);
+  const [loaded, setLoaded] = useState(false);
+  const [broken, setBroken] = useState(false);
+  const show = gif && !broken;
+  return (
+    <div className={cn('relative flex shrink-0 items-center justify-center', className)}>
+      {(!show || !loaded) && <span aria-hidden>{fallback}</span>}
+      {show && (
+        <img
+          src={gif.src}
+          alt={gif.alt}
+          draggable={false}
+          onLoad={() => setLoaded(true)}
+          onError={() => setBroken(true)}
+          className={cn(
+            'absolute inset-0 size-full rounded-3xl bg-white object-contain p-1 shadow-xl shadow-rose-300/40 ring-4 ring-white/70 transition-opacity duration-500',
+            loaded ? 'opacity-100' : 'opacity-0',
+          )}
+        />
+      )}
+      {show && loaded && (
+        <>
+          {gif.giphy && <span className="absolute inset-x-0 -bottom-5 text-center text-[10px] font-semibold text-rose-900/45">Powered by GIPHY</span>}
+          <span aria-hidden>{children}</span>
+        </>
+      )}
     </div>
   );
 }
@@ -161,6 +194,7 @@ function LoveScene() {
       <main className="relative z-10 flex min-h-full flex-col items-center justify-center px-4 py-16 text-center" aria-live="polite">
         {phase === 'ask' && (
           <div key="ask" className="love-in flex w-full max-w-xl flex-col items-center">
+            <LoveGif kind="love" className="mb-5 size-36 sm:size-44" fallback={<span className="love-beat text-6xl">💗</span>} />
             <p className="rounded-full bg-white/60 px-4 py-1.5 text-xs font-semibold text-rose-700 shadow-sm backdrop-blur">
               🌷 Today’s note for {HER_NAME} · {today}
             </p>
@@ -206,9 +240,9 @@ function LoveScene() {
 
         {phase === 'yes' && (
           <div key="yes" className="love-in flex max-w-xl flex-col items-center">
-            <span aria-hidden className="love-beat text-8xl">
-              ❤️
-            </span>
+            <LoveGif kind="kiss" className="size-52 sm:size-60" fallback={<span className="love-beat text-8xl">❤️</span>}>
+              <span className="love-beat absolute -right-4 -top-4 text-5xl">❤️</span>
+            </LoveGif>
             <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-rose-900 sm:text-5xl">Yaaay! 🥰</h1>
             <p className="mt-4 text-lg text-rose-800 text-balance sm:text-xl">
               You just made me the happiest person alive. I love you, {HER_NAME} — today, tomorrow and always. 😘💋
@@ -219,9 +253,7 @@ function LoveScene() {
 
         {phase === 'no' && (
           <div key="no" className="love-in flex max-w-md flex-col items-center">
-            <span aria-hidden className="love-wobble text-[120px] leading-none">
-              😢
-            </span>
+            <LoveGif kind="sad" className="size-44" fallback={<span className="love-wobble text-[120px] leading-none">😢</span>} />
             <h1 className="mt-6 text-3xl font-bold tracking-tight text-slate-800">Okay… that broke my heart a little 💔</h1>
             <p className="mt-3 text-base text-slate-600 text-balance">I’ll still be right here, loving you anyway.</p>
             <button

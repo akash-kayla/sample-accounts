@@ -153,8 +153,12 @@ export const LOVE_NOTES: string[] = [
   'No matter what happens in this crazy world, please never forget this: you are the best thing that ever happened to me, and I will love you until my very last breath.',
 ];
 
+/** Days since 1970 for the local date — changes at local midnight. */
+export function dayNumber(d = new Date()) {
+  return Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86_400_000);
+}
+
 /** Same note all day, a different one tomorrow. */
 export function noteOfTheDay(d = new Date()) {
-  const day = Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86_400_000);
-  return LOVE_NOTES[day % LOVE_NOTES.length];
+  return LOVE_NOTES[dayNumber(d) % LOVE_NOTES.length];
 }
